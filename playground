@@ -143,5 +143,99 @@ var namesDictionary: [String: Int] = [
     "Allison": 24
 ]
 
-namesDictionary = [:]
+if let oldValue = namesDictionary.updateValue(26, forKey: "Irwing") {
+    print("Antes tenia la edad de \(oldValue)")
+}
+
+for (key, value) in namesDictionary {
+    print("Nombre: \(key), Edad: \(value)")
+}
+
+for nameKey in namesDictionary.keys {
+    print("Nombre: \(nameKey)")
+}
+
+var i: Int = 0
+while i < 10 {
+    i += 1
+}
+
+repeat {
+    i += 1
+} while i < 14
+
+print(i)
+
+namesDictionary
 namesDictionary.count
+namesDictionary = [:]
+
+let money = 450
+let phrase2 : String
+let face : String
+
+switch money {
+case 0..<10:
+    phrase2 = "dar dinero"
+    face = "😀"
+case 10..<20:
+    phrase2 = "dar dinero haciendo mueca"
+    face = "🙃"
+case 20..<50:
+    phrase2 = "dar dinero con sermon"
+    face = "🤬"
+case 50..<100:
+    phrase2 = "no dar dinero y decir que en otro momento"
+    face = "🤪"
+default:
+    phrase2 = "no dar dinero y decir que nunca jamas"
+    face = "😎"
+}
+
+print("\(phrase2) \(face)")
+
+
+let deliveryState: (String, String, Int) = (Estado: "Entregado", Horario: "A tiempo", Distancia: 49 )
+let status: String
+
+// Reto
+switch deliveryState {
+case ("Entregado", "A tiempo", 0..<50):
+    status = "El pedido a sido entregado a tiempo y cerca al punto GPS registrado"
+case ("Entregado", "Retrasado", 0..<50):
+    status = "El pedido a sido entregado con retraso y cerca al punto GPS registrado"
+case ("Pendiente",_, _):
+    status = "El pedido todavia no a sido entregado"
+case ("Entregado", "A tiempo", 50...100):
+    status = "El pedido a sido entregado a tiempo, lejano al punto GPS registrado"
+case ("Entregado", "Retrasado", 50...100):
+    status = "El pedido a sido entregado con retraso, lejano al punto GPS registrado"
+default:
+    status = "Por favor ponerse en contacto con nuestros operadores"
+}
+
+print(status)
+
+let integerToDescribe = 5
+var description = "El numero \(integerToDescribe) es"
+switch integerToDescribe {
+case 2,3,5,7,11,13,17,19:
+    description += " un nuemro primo"
+    fallthrough
+default:
+    description += " y un numero entero"
+}
+print(description)
+
+///El guard se utiliza dentro de una función para realizar un unwrapping de los opcionales. Si encuentra nil dentro, finalizará la función, bucle o cualquier condición usada.
+
+var people: [String: Any] = ["name": "Irwing Herrera", "age": 25, "isMale": true]
+
+//guard let surname = people["surname"] else { return }
+// aqui existe surname
+
+if #available(iOS 12, macOS 10.12, *){
+    //Ejecutar las acciones a lo iOS12+, a los macOS12+
+}else{
+    //Mantener el código viejo con versiones anteriores de iOS, macOS...
+}
