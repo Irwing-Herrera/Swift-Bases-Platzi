@@ -1,0 +1,729 @@
+import UIKit
+
+// Estructuras
+struct Resolution {
+    var width = 0
+    var height = 0
+}
+
+// Clases
+class VideoMode {
+    var resolution = Resolution()
+    var interlaced = false
+    var frameRate = 0.0
+    var name: String?
+}
+
+let someResolution = Resolution()
+let someVideoMode = VideoMode()
+
+print(someResolution.width)
+someVideoMode.resolution.width = 1280
+print(someVideoMode.resolution.width)
+
+//someResolution.width = 1280    // esto no se puede hacer porque fue declarada como constante.
+
+someVideoMode.frameRate = 30.0
+print(someVideoMode.frameRate)
+
+// Lazy Stored Properties
+
+///Como ejemplo, DataImported es una clase muy pesada que se encarga de realizar muchas cosas:
+class DataImported {
+    var fileName = "data.txt"
+}
+
+///La clase DataManager se encarga de manejar los distintos tipos de importación de archivos:
+class DataManager {
+    lazy var importer = DataImported()
+    var data = [String]()
+}
+
+///Al usar lazy delante de la variable importer, esta no va a ser creada automáticamente cuando se crea el manager hasta que realmente sea necesario.
+let manager = DataManager()
+manager.data.append("Algo de datos")
+manager.data.append("Muchos mas datos")
+///Hasta esta linea, el importer no ha sido creado…
+manager // nil
+manager.importer.fileName
+///En este momento se da la instrucción de inicializar la variable importer de la clase DataManager(). A partir de aca la variable importer ya ha sido creada.
+manager // {fileName "data.txt"}
+
+
+// Computed Properties
+struct Point {
+    var x: Float = 0.0
+    var y: Float = 0.0
+}
+
+struct Size {
+    var width: Float = 0.0
+    var height: Float = 0.0
+}
+
+struct Rect {
+    var origin = Point()
+    var size = Size()
+    var center: Point {
+        get {
+            let centerX = origin.x + size.width / 2
+            let centerY = origin.y + size.height / 2
+            return Point(x: centerX, y: centerY)
+        }
+        set(newCenter){
+            origin.x = newCenter.x - size.width / 2
+            origin.y = newCenter.y - size.height / 2
+        }
+    }
+}
+
+var square = Rect(origin: Point(x: 0,y: 0), size: Size(width: 10, height: 10))
+square.center
+
+let initialSquareCenter = square.center
+square.center = Point(x: 20, y: 20)
+
+
+enum Languaje {
+    case Spanish, English, French
+}
+enum Gender{
+    case male, female
+}
+struct Person{
+    var name: String
+}
+struct Gretting{
+    var person: Person
+    var languaje: Languaje
+    var gender: Gender
+    var languajeGretting: String{
+            switch self.languaje {
+            case .Spanish:
+                return "Hola "
+            case .English:
+                return "Hello "
+            case .French:
+                return "Salut "
+        }
+    
+    }
+    var abbreviations: String{
+            switch self.gender {
+            case .male:
+                return languajeGretting + "Mr. \(person.name)"
+            case .female:
+                return languajeGretting + "Mrs. \(person.name)"
+        }
+    }
+}
+
+let guest = Person(name: "Irwing")
+let welcomeGretting = Gretting(person: guest, languaje: .French, gender: .male)
+welcomeGretting.abbreviations
+
+// Property Observers
+
+class LifePlayer
+{
+    var stringGameOver = "GAME OVER"
+    var plusLifes : Int8 = 0
+    {
+        willSet(newLifes)
+        {
+            if newLifes > 100
+            {
+                lifes = 100
+                print("El numero maximo de vidas solo puede ser 100")
+            }
+            else if newLifes <= 100
+            {
+                lifes += newLifes
+                print("Se han agregado \(newLifes)")
+            }
+        }
+    }
+    var lifes : Int8 = 5
+    {
+        didSet
+        {
+            if lifes <= 0
+            {
+                print(stringGameOver)
+            }
+            else if lifes > 100
+            {
+            print("El jugador solo puede tener como maximo 100 vidas")
+            lifes = 100
+            }
+        }
+    }
+}
+
+let testingLifePlayerClass = LifePlayer()
+testingLifePlayerClass.plusLifes = 2
+print(testingLifePlayerClass.lifes)
+
+testingLifePlayerClass.plusLifes = 101
+print(testingLifePlayerClass.lifes)
+
+testingLifePlayerClass.lifes = 0
+print(testingLifePlayerClass.lifes)
+
+testingLifePlayerClass.lifes = 105
+print(testingLifePlayerClass.lifes)
+
+// Type Properties
+class PersonInHome {
+    static var presupuesto = 100
+    var name = ""
+    
+    func hacerCompras(_ gasto: Int,_ detalle: String) -> Void {
+        PersonInHome.presupuesto -= gasto
+        print("\(self.name) compró \(detalle) y ahora el presupuesto es de \(PersonInHome.presupuesto)")
+    }
+}
+
+let irwing = PersonInHome()
+let allison = PersonInHome()
+
+irwing.name = "Irwing"
+allison.name = "Allison"
+
+irwing.hacerCompras(10, "Panes")
+allison.hacerCompras(20, "Agua")
+
+PersonInHome.presupuesto
+
+
+/// Mutating Methods
+/// Actualizar el valor de las propiedades desde afuera en las estructuras y enumerados
+enum DifferentStateSwitch {
+    case off, low, high
+    
+    mutating func next() {
+        switch self {
+        case .off:
+            self = .low
+        case .low:
+            self = .high
+        case .high:
+            self = .off
+        }
+    }
+}
+
+
+/// Métodos de clase
+struct LevelTracker {
+    static var highestUnlockedLevel: Int8 = 1
+    var curretLevel: Int8 = 1
+    
+    /**
+     Actualiza el nivel descnloqueado mas alto, solo si es mayor el nivel al actual
+     */
+    static func unlock(_ level: Int8) -> Void {
+        if level > highestUnlockedLevel {
+            highestUnlockedLevel = level
+        }
+    }
+    
+    /**
+     Revisa si ya se a llegado a ese nivel para desbloquearlo
+     */
+    static func isUnlocked(_ level: Int8) -> Bool {
+        return level <= highestUnlockedLevel
+    }
+    
+    /**
+     Asigna el nuevo nivel
+     */
+    mutating func advance(to level: Int8) -> Bool {
+        if LevelTracker.isUnlocked(level) {
+            curretLevel = level
+            return true
+        } else {
+            return false
+        }
+    }
+}
+
+class Player {
+    var tracker = LevelTracker()
+    let playerName: String
+    
+    init(name: String) {
+        self.playerName = name
+    }
+    
+    func complete(level: Int8) {
+        LevelTracker.unlock(level + 1)
+        tracker.advance(to: level + 1)
+    }
+}
+
+var player = Player(name: "Irwing")
+player.complete(level: 1)
+player
+
+if player.tracker.advance(to: 7) {
+    print("Podemos avanzar hasta el nivel 7")
+} else {
+    print("El nivel 7 sigue desbloqueado por ahora")
+}
+ 
+// Subíndices
+enum Planet: Int {
+    case mercury = 1, venus, earth, mars, jupiter, saturn, uranus, neptune
+    static subscript(n: Int) -> Planet? {
+        return Planet(rawValue:  n)
+    }
+}
+
+if let mars = Planet[4] {
+    print("EL planeta es \(mars)")
+} else {
+    print("El planeta no existe")
+}
+
+
+// Matrices usando subíndices
+struct Matrix {
+    let rows: Int
+    let columns: Int
+    var grid: [Double]
+    
+    init(rows: Int, columns: Int) {
+        self.rows = rows
+        self.columns = columns
+        grid = Array(repeating: 0.0, count: rows * columns)
+    }
+    
+    func indexIsValid(row: Int, column: Int) -> Bool {
+        return row >= 0 &&
+               column >= 0 &&
+               row < rows &&
+               column < columns
+    }
+    
+    subscript(row: Int, column: Int) -> Double {
+        get {
+            assert(indexIsValid(row: row, column: column), "Index out of range")
+            return grid[(row*columns) + column]
+        }
+        set {
+            assert(indexIsValid(row: row, column: column), "Index out of range")
+            grid[(row*columns) + column] = newValue
+        }
+    }
+}
+
+var matrix = Matrix(rows: 5, columns: 5)
+matrix[0, 1] = 1.5
+matrix[1, 0] = 2.5
+matrix
+
+for row in 0..<matrix.rows{
+    for col in 0..<matrix.columns {
+        print(matrix[row,col], separator: "", terminator: " ")
+    }
+    print("")
+}
+
+matrix
+
+
+// Herencia
+class Vehicle {
+    var currentSpeed = 0.0
+    var description: String{
+        return "Viajando a \(currentSpeed) km/h"
+    }
+    func makeNoise(){
+        //do nothing, porque cada vehículo tiene su propia forma de hacer ruido
+        print("El ruido depende del vehículo")
+    }
+}
+
+let someVehicle = Vehicle()
+print(someVehicle.description)
+
+class Bicycle : Vehicle {
+    var hasBasket = false
+}
+
+let bicycle = Bicycle()
+bicycle.hasBasket = true
+bicycle.currentSpeed = 15.0
+
+print(bicycle.description)
+
+class Tandem : Bicycle{
+    var currentNumberOfPassengers = 0
+}
+
+let tandem = Tandem()
+tandem.hasBasket = true
+tandem.currentNumberOfPassengers = 2
+tandem.currentSpeed = 22.0
+print(tandem.description)
+
+class Train: Vehicle{
+    final var numberOfWagons = 0
+    
+    override func makeNoise() {
+       print("Chooo Chooo")
+    }
+}
+
+let train = Train()
+train.makeNoise()
+tandem.makeNoise()
+
+class Car: Vehicle{
+    var gear = 1
+    override var description: String{
+        return super.description + " en la marcha \(gear)"
+    }
+}
+
+let car = Car()
+car.currentSpeed = 55
+car.gear = 3
+print(car.description)
+print(tandem.description)
+
+class AutomaticCar : Car{
+    override var currentSpeed: Double{
+        didSet{
+            gear = Int(currentSpeed / 15.0) + 1
+        }
+    }
+}
+
+let automatic = AutomaticCar()
+automatic.currentSpeed = 65
+print(automatic.description)
+
+// Inicializadores
+struct Fahrenheit {
+    var temperature : Double
+   
+    init(){
+        self.temperature = 32
+    }
+}
+
+var f1 = Fahrenheit()
+
+struct Celsius {
+    var temperature: Double
+    
+    init(fromFahrenheit fahrenheit: Double) {
+        self.temperature = (fahrenheit - 32) / 1.8
+    }
+    
+    init(fromKelvin kelvin:Double) {
+        self.temperature = kelvin - 273.15
+    }
+    
+    init(_ celsius: Double) {
+        self.temperature = celsius
+    }
+}
+
+
+let boilingPointOfWater = Celsius(fromFahrenheit: 212)
+let freezingPointOfWater = Celsius(fromKelvin: 273.15)
+
+struct Color{
+    let red, green, blue: Double
+    init(red: Double, green: Double, blue: Double) {
+        self.red = red
+        self.green = green
+        self.blue = blue
+    }
+    init(white: Double) {
+        self.red = white
+        self.green = white
+        self.blue = white
+    }
+}
+
+
+let magenta = Color(red: 1, green: 0, blue: 1)
+let halfGrey = Color(white: 0.5)
+let green = Color(red: 0,green: 1,blue: 0)
+
+let bodyTemperature = Celsius(37)
+
+class SurveyQuestion {
+    let text: String
+    var response: String?
+    
+    init(text: String) {
+        self.text = text
+    }
+    
+    func ask() {
+        print(text)
+    }
+}
+
+let q1 = SurveyQuestion(text: "¿Te gustan los tacos?")
+q1.ask()
+q1.response = "Si, me encatan todos ellos"
+
+// Inicializadores en subclases
+
+//Designado -> Designado super clase
+//Conveniencia -> Otro init de la misma clase
+//El último init que se llame siempre debe ser designado
+class NewVehicle {
+    var numberOfWheels = 0
+    var description: String{
+        return "\(numberOfWheels) ruedas"
+    }
+}
+
+let vehicle = NewVehicle()
+vehicle.description
+
+class NewBicycle: NewVehicle{
+    override init() {
+        super.init()
+        numberOfWheels = 2
+    }
+}
+
+let newBicycle = NewBicycle()
+newBicycle.description
+
+class Hoverboard: NewVehicle{
+    var color: String
+    init(color: String){
+        self.color = color
+        //aquí se llama implícitamente a super.init()
+    }
+    override var description: String{
+        return "\(super.description) en el color \(self.color)"
+    }
+}
+
+let hoverboard = Hoverboard(color: "Silver")
+hoverboard.description
+
+enum TemperatureUnit{
+    case kelvin, celsius, fahrenheit
+
+    init?(symbol: Character){
+        switch symbol {
+        case "K":
+            self = .kelvin
+        case "C":
+            self = .celsius
+        case "F":
+            self = .fahrenheit
+        default:
+            return nil
+        }
+    }
+}
+
+let someUnit = TemperatureUnit(symbol: "X")
+
+
+
+class Product{
+    let name: String
+    init?(name: String) {
+        if name.isEmpty{
+            return nil
+        }
+        self.name = name
+    }
+}
+
+class CartItem: Product{
+    let quantity: Int
+    init?(name: String, quantity: Int){
+        if quantity < 1{
+            return nil
+        }
+        self.quantity = quantity
+        super.init(name: name)
+    }
+}
+
+if let someSocks = CartItem(name: "Socks", quantity: 2){
+    print("\(someSocks.name) - \(someSocks.quantity)")
+}
+
+
+
+class Bank {
+    static var coinsInBank = 2_000
+    static func distribute(coins numberOfCoinsRequested:Int) -> Int {
+        let numberOfCoinsToVend = min(numberOfCoinsRequested, coinsInBank)
+        coinsInBank -= numberOfCoinsToVend
+        return numberOfCoinsToVend
+    }
+    static func receive(coins: Int){
+        coinsInBank += coins
+    }
+}
+
+class NewPlayer {
+    var coinsInPurse: Int
+    init(coins: Int){
+        self.coinsInPurse = Bank.distribute(coins: coins)
+    }
+    func win(coins: Int) {
+        coinsInPurse += Bank.distribute(coins: coins)
+    }
+    
+    deinit {
+        Bank.receive(coins: coinsInPurse)
+    }
+    
+}
+
+
+
+var playerOne: NewPlayer? =  NewPlayer(coins: 100)
+Bank.coinsInBank
+playerOne!.win(coins: 2_000)
+Bank.coinsInBank
+
+playerOne = nil
+Bank.coinsInBank
+
+
+// Optional Chaining
+
+class NewPerson {
+    var residence: Residence?
+}
+
+class Residence{
+    var rooms = [Room]()
+    var numberOfRooms : Int {
+        return rooms.count
+    }
+    subscript(i: Int) -> Room{
+        get {
+            return rooms[i]
+        }
+        set {
+            rooms[i] = newValue
+        }
+    }
+    var address: Address?
+    
+    
+    func printNumberOfRooms(){
+        print("El número de habitaciones es \(numberOfRooms)")
+    }
+}
+
+class Room{
+    let name: String
+    init(name: String){
+        self.name = name
+    }
+}
+
+class Address {
+    var buildingName: String?
+    var buildingNumber: String?
+    var street: String?
+    
+    func buildingIdentifier() -> String?{
+        if let buildingNumber = buildingNumber, let street = street{
+            return "\(buildingNumber), \(street)"
+        }else if buildingName != nil{
+            return buildingName
+        } else{
+            return nil
+        }
+    }
+}
+
+
+
+let edgar = NewPerson()
+
+if let roomCount = edgar.residence?.numberOfRooms{
+    print("La casa de Edgar tiene \(roomCount) habitación(es)")
+}else{
+    print("Edgar no tiene casa")
+}
+
+
+func createAddress() -> Address{
+    print("La función ha sido llamada")
+    
+    let someAddress = Address()
+    someAddress.buildingNumber = "13"
+    someAddress.street = "Calle de Platzi"
+    
+    return someAddress
+}
+
+edgar.residence?.address = createAddress()
+edgar
+edgar.residence?.printNumberOfRooms()
+
+if edgar.residence?.printNumberOfRooms() != nil{
+    print("He podido obtener el número de habitaciones")
+} else{
+    print("NO ha sido posible saber el número de habitaciones")
+}
+
+
+if (edgar.residence?.address = createAddress()) != nil {
+    print("Ha sido posible configurar la dirección de Edgar")
+} else {
+    print("Seguimos sin saber donde vive Edgar")
+}
+
+
+if let firstRoomName = edgar.residence?[0].name {
+    print("La primera habitación es de \(firstRoomName)")
+}else{
+    print("La primera habitación no sabemos de quien es")
+}
+
+edgar.residence?[0] = Room(name: "Bathroom")
+
+let edgarHouse = Residence()
+edgarHouse.rooms.append(Room(name:"Bathroom"))
+edgarHouse.rooms.append(Room(name:"Living Room"))
+edgarHouse.rooms.append(Room(name:"Kitchen"))
+edgar.residence = edgarHouse
+
+if let firstRoomName = edgar.residence?[0].name {
+    print("La primera habitación es de \(firstRoomName)")
+}else{
+    print("La primera habitación no sabemos de quien es")
+}
+
+edgar.residence?.address = createAddress()
+
+if let edgarStreet = edgar.residence?.address?.street{
+    print("La casa de Edgar está en la calle \(edgarStreet)")
+}else{
+    print("No se donde vive Edgar")
+}
+edgar
+
+
+if let buildingIdentifier = edgar.residence?.address?.buildingIdentifier(){
+    print("Edgar vive en \(buildingIdentifier)")
+}
+
+if let _ = edgar.residence?.address?.buildingIdentifier()?.hasPrefix("13"){
+    print("Edgar vive en el número 13")
+} else{
+    print("Edgar no vive en el número 13")
+}
